@@ -3,8 +3,10 @@ import { prisma } from "../db.js";
 
 const router = Router();
 
+
 router.get("/products", async (req, res) => {
 	try {
+		// get all product findMany
 		const products = await prisma.product.findMany({
 			include: {
 				category: true,
