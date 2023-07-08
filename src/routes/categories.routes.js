@@ -16,4 +16,22 @@ router.get("/categories", async (req, res, next) => {
 	}
 });
 
+router.post("/categories", async (req, res, next) => {
+
+	// console.log({req});
+	// console.log(req.body);
+	try {
+		const category = await prisma.category.create({
+			data:  req.body,
+			// data: {
+			// 	name: req.name,
+			//   },
+		});
+		res.json(category);
+	} catch (error) {
+		// console.log({error});
+		next(error);
+	}
+});
+
 export default router;

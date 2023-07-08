@@ -4,7 +4,7 @@ import { prisma } from "../db.js";
 const router = Router();
 
 
-router.get("/products", async (req, res) => {
+router.get("/products", async (req, res, next) => {
 	try {
 		// get all product findMany
 		const products = await prisma.product.findMany({
@@ -18,13 +18,15 @@ router.get("/products", async (req, res) => {
 	}
 });
 
-router.post("/products", async (req, res) => {
+router.post("/products", async (req, res, next) => {
 	try {
-		const product = await prisma.product.create({
+		const product = await prisma.Product.create({
 			data: req.body,
 		});
+		// console.log({product});
 		res.json(product);
 	} catch (error) {
+		console.log({error});
 		next(error);
 	}
 });
@@ -50,7 +52,7 @@ router.delete("/products/:id", async (req, res) => {
 	res.json(product.quantity);
 });
 
-router.patch("/products/:id", async (req, res) => {
+router.patch("/products/:id", async (req, res, next) => {
 	try {
 		const product = await prisma.product.update({
 			where: {
