@@ -9,9 +9,9 @@ router.get("/users", async (req, res, next) => {
   try {
     // get all user findMany
     const users = await prisma.user.findMany({
-      // include: {
-      // 	category: true,
-      // },
+      include: {
+      	posts: true,
+      },
     });
     res.json(users);
   } catch (error) {
@@ -45,6 +45,51 @@ router.post("/users", async (req, res, next) => {
   }
 });
 
+router.get("/users/:id", async (req, res) => {
+	const user = await prisma.user.findUnique({
+		where: {
+			id: Number(req.params.id),
+		},
+		include: {
+			posts: true,
+		},
+	});
+	res.json(user);
+});
+
+
+router.put("/users/:id", async (req, res, next) => {
+	try {
+		const user = await prisma.user.update({
+			where: {
+				id: Number(req.params.id),
+			},
+			data: req.body,
+			include: {
+				posts: true,
+			},
+		});
+		res.json(user);
+	} catch (error) {
+		next(error);
+	}
+});
+
+
+router.delete("/users/:id", async (req, res) => {
+	const user = await prisma.user.delete({
+		where: {
+			id: Number(req.params.id),
+		},
+	});
+	// res.json(user.quantity);
+	res.json(user);
+});
+
+
+
+
+
 // **************************************************************
 
 router.post("/login", async (req, res, next) => {
@@ -60,35 +105,28 @@ router.post("/login", async (req, res, next) => {
       });
 
       if (userdb != null) {
-        if (
-          !bcrypt.compareSync(password, userdb.password ? userdb.password : "")
-        ) {
-          // res.sendStatus(400);
-          res.sendStatus(400).json({
-            ok: false,
-            err: {
-              message: "incorrect password",
-            },
-          });
-        } else {
-          const user = { userdb };
-          // expiresIn: process.env.CADUCIDAD_TOKEN
-          const token = jwt.sign({ user }, "my_secret_key", {
-            expiresIn: "10h",
-          });
-          res.json({
-            user: userdb,
-            msj: "is ready jwt",
-            token,
-          });
-        }
+			if (!bcrypt.compareSync(password, userdb.password ? userdb.password : "")) {
+			// 	 res.sendStatus(400);
+			//   res.send('some text');
+			// res.end(JSON.stringify({ message: 'Unauthorized' }));
+			// res.status(400).send({ message: 'incorrect password' });
+			res.status(400).json({success: false, message: 'incorrect password' });
+			} else {
+			const id = userdb.id;
+			// const user = { userdb };
+			// expiresIn: process.env.CADUCIDAD_TOKEN
+			const token = jwt.sign({ user : id }, "my_secret_key", {
+				expiresIn: "10h",
+			});
+			res.json({
+				user: userdb,
+				msj: "is ready jwt",
+				token,
+			});
+			}
       } else {
-        res.sendStatus(400).json({
-          err: {
-            message: "incorrect email",
-          },
-          ok: false,
-        });
+		// res.status(400).send({ message: 'incorrect email' });
+		res.status(400).json({success: false, message: 'incorrect email' });
       }
     } catch (error) {
       // console.log({error});
@@ -97,7 +135,7 @@ router.post("/login", async (req, res, next) => {
       next(error);
     }
   } else {
-    console.log("empty");
+	res.status(400).send({ message: 'is empty email or password' });
   }
 });
 
@@ -114,7 +152,9 @@ router.get("/proctected", middletoken, (req, res) => {
   });
 });
 
-router.get("/logout", (req, res) => {
+router.get("/logout", middletoken, (req, res) => {
+	// used coockies nodejs or save token in db and destroy
+	//jwt used time validate
 //   req.session.destroy(() => {
 //     res.redirect("/");
 //   });
@@ -129,7 +169,8 @@ function middletoken(req, res, next) {
     req.token = bearerToken;
     next();
   } else {
-    res.sendStatus(403);
+	res.status(403).send({ message: 'token is expired' });
+
   }
 }
 
