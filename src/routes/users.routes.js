@@ -112,11 +112,9 @@ router.post("/login", async (req, res, next) => {
 			// res.status(400).send({ message: 'incorrect password' });
 			res.status(400).json({success: false, message: 'incorrect password' });
 			} else {
-			const id = userdb.id;
-			// const user = { userdb };
-			// expiresIn: process.env.CADUCIDAD_TOKEN
-			const token = jwt.sign({ user : id }, "my_secret_key", {
-				expiresIn: "10h",
+			const id = userdb.id; //only id because is many information
+			const token = jwt.sign({ user : id }, env(SECRET_KEY), {
+				expiresIn: env(EXPIRATION_TOKEN),// env() is function prisma
 			});
 			res.json({
 				user: userdb,
@@ -140,7 +138,7 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/proctected", middletoken, (req, res) => {
-  jwt.verify(req.token, "my_secret_key", (err, data) => {
+  jwt.verify(req.token, env(SECRET_KEY), (err, data) => {
     if (err) {
       res.sendStatus(403);
     } else {
