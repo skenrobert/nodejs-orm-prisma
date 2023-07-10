@@ -17,6 +17,7 @@ model User {
   username  String?
   password String
   posts Post[]
+  person Person?
 }
 
 model Post {
@@ -42,4 +43,203 @@ model Category {
   id Int @id @default(autoincrement())
   name String @unique
   products Product[]
+}
+
+//**************************************companies*****************************
+
+
+model Company {
+  id    Int     @id @default(autoincrement())
+  // expenditurelevel  Expenditurelevel  @default(ZERO)  //fail
+  name String
+  business_name String
+  identification_code String  @unique
+  address  String?
+  phone1  String?
+  phone2  String?
+  email String?
+  legal_representative  String?
+  image  String?
+  currency  String?
+  retainer Boolean @default(false)
+  date_resolution DateTime?
+  resolution_retainer  String?
+  renta_retainer  String?
+  ecommerce Boolean @default(false)
+  pucedit Boolean @default(false)
+  msg_puc String @default("This option has a standard configuration with the list to be used any change will directly affect its accounting and will be under its responsibility")
+  contact_name  String?
+  contact_phone  String?
+  puc_id Int?
+  created_id Int?
+  createdAt DateTime @default(now())
+
+  client Client?
+  provider Provider?
+  employee Employee?
+  partner Partner?
+  otherperson Otherperson?
+  payrollentity Payrollentity?
+  mastercardVisas MastercardVisas?
+
+  subcompanyId Int?    @unique
+  subcompany   Company?   @relation("sub_company", fields: [subcompanyId], references: [id])
+  maincompany Company?   @relation("sub_company")
+}
+
+// enum Expenditurelevel {
+//   ZERO
+//   // FIRST
+//   // SECUND
+//   // THIRD
+// }
+
+
+//**********************************people******************************************************
+
+model Person {
+  id    Int     @id @default(autoincrement())
+  identification String  @unique
+  name String
+  lastname  String?
+  image  String?
+  address  String?
+  celular  String?
+  phone  String?
+  status Boolean @default(false)
+  website  String?
+  birthday DateTime? //@db.Date //no soporte sqllite
+  email String?
+  years_old Int?
+  created_id Int?
+  createdAt DateTime @default(now())
+  userId Int?    @unique
+  User   User?   @relation(fields: [userId], references: [id])
+
+  client Client?
+  provider Provider?
+  employee Employee?
+  partner Partner?
+  otherperson Otherperson?
+  payrollentity Payrollentity?
+  mastercardVisas MastercardVisas?
+}
+
+model Provider {
+  id    Int     @id @default(autoincrement())
+  website  String?
+  creditdays Int?
+  creditlimit Int?
+  observation  String?
+  status Boolean @default(false)
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
+
+}
+
+model Client {
+  id    Int     @id @default(autoincrement())
+  website  String?
+  creditdays Int?
+  creditlimit Int?
+  discount Int?
+  observation  String?
+  status Boolean @default(false)
+  msg_status String @default("Welcome client")
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
+}
+
+model Employee {
+  id    Int     @id @default(autoincrement())
+  salary  Float?
+  observation  String?
+  status Boolean @default(false)
+  msg_status String @default("change the status")
+  start DateTime?
+  end DateTime?
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
+
+  supervisorId Int?    @unique
+  supervisor   Employee?   @relation("supervisor_company", fields: [supervisorId], references: [id])
+  supervisor_employee Employee?   @relation("supervisor_company")
+}
+
+
+model Partner {
+  id    Int     @id @default(autoincrement())
+  number_actions Int?
+  status Boolean @default(false)
+  participation_percentage  Float?
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
+}
+
+model Otherperson {
+  id    Int     @id @default(autoincrement())
+  number_actions Int?
+  creditdays Int?
+  creditlimit Int?
+  observation  String?
+  description  String?
+  status Boolean @default(false)
+  contractor Boolean @default(false)
+  mayor Boolean @default(false)
+  government Boolean @default(false)
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
+}
+
+model Payrollentity {
+  id    Int     @id @default(autoincrement())
+  code  String?
+  observation  String?
+  status Boolean @default(false)
+  eps Boolean @default(false)
+  afp Boolean @default(false)
+  arl Boolean @default(false)
+  sena Boolean @default(false)
+  icbf Boolean @default(false)
+  ccf Boolean @default(false)
+  fondocesantias Boolean @default(false)
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
+}
+
+model MastercardVisas {
+  id    Int     @id @default(autoincrement())
+  code  String?
+  description  String?
+  status Boolean @default(false)
+  created_id Int?
+  createdAt DateTime @default(now())
+  personId Int?    @unique
+  person   Person?   @relation(fields: [personId], references: [id])
+  companyId Int?    @unique
+  company   Company?   @relation(fields: [companyId], references: [id])
 }
